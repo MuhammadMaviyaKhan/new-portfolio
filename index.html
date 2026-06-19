@@ -13,6 +13,8 @@
   <meta property="og:title" content="Maviya Hussaini | Frontend Developer" />
   <meta property="og:description" content="Modern, performant, and accessible web experiences." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://maviyahussaini.dev" />
+  <meta property="og:image" content="https://maviyahussaini.dev/image/Untitled%20design%20(6).jpg" />
   <meta name="theme-color" content="#0a0a0f" />
   <link rel="canonical" href="https://maviyahussaini.dev" />
   <title>Maviya Hussaini | Frontend Developer</title>
@@ -1438,6 +1440,22 @@
         height: 44px;
         font-size: 1.3rem;
       }
+
+      .navbar.scrolled {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(10, 10, 15, 0.95);
+      }
+
+      .hero-image-wrapper::before {
+        animation: none;
+      }
+
+      .hero::before,
+      .hero::after {
+        width: 300px;
+        height: 300px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -1724,8 +1742,8 @@
           </p>
           <div class="about-info-grid">
             <div class="about-info-item"><span class="lbl">Name:</span><span class="val">Maviya Hussaini</span></div>
-            <div class="about-info-item"><span class="lbl">Email:</span><span class="val">hello@maviya.dev</span></div>
-            <div class="about-info-item"><span class="lbl">Location:</span><span class="val">Remote / Worldwide</span>
+            <div class="about-info-item"><span class="lbl">Email:</span><span class="val">maviya.khan2008@gmail.com</span></div>
+            <div class="about-info-item"><span class="lbl">Location:</span><span class="val">Remote</span>
             </div>
             <div class="about-info-item"><span class="lbl">Availability:</span><span class="val">Freelance /
                 Full-time</span></div>
@@ -1821,7 +1839,7 @@
           <div class="project-thumb">
             <img src="./image/rentcar.png" alt="RENT CAR screenshot" loading="lazy" />
             <div class="overlay">
-              <a href="https://muhammadmaviyakhan.github.io/RENT_CAR_WEBSITE/" aria-label="View project"><i class="fa-solid fa-link"></i></a>
+              <a href="https://muhammadmaviyakhan.github.io/RENT_CAR_WEBSITE/" aria-label="View project" target="_blank" rel="noopener"><i class="fa-solid fa-link"></i></a>
               <a href="https://github.com/MuhammadMaviyaKhan/RENT_CAR_WEBSITE.git" aria-label="View source code"><i class="fa-brands fa-github"></i></a>
             </div>
           </div>
@@ -2017,7 +2035,7 @@
               </div>
             </div>
             <div class="contact-detail-item">
-              <div class="icon"><i class="fa-regular fa-location-dot"></i></div>
+              <div class="icon"><i class="fa-solid fa-location-dot"></i></div>
               <div>
                 <div class="detail-label">Location</div>
                 <div class="detail-value">Remote — Worldwide</div>
@@ -2104,63 +2122,81 @@
   </footer>
 
   <script>
-    // ===== PARTICLES =====
+    // ===== PARTICLES (performance-optimized) =====
     (function () {
       const canvas = document.getElementById('particles-canvas');
       const ctx = canvas.getContext('2d');
+      if (!ctx) return;
       let particles = [];
-      let mouse = { x: null, y: null };
       let w, h;
+      const isMobile = window.innerWidth < 768;
+      const isTablet = window.innerWidth < 1024;
+      const MAX_PARTICLES = isMobile ? 25 : isTablet ? 45 : 70;
+      const CONNECT_DIST = isMobile ? 0 : isTablet ? 100 : 140;
 
       function resize() {
         w = canvas.width = window.innerWidth;
         h = canvas.height = window.innerHeight;
       }
-      window.addEventListener('resize', resize);
+      let resizeTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+          resize();
+          initParticles();
+        }, 200);
+      });
       resize();
 
-      class Particle {
-        constructor() { this.reset(); }
-        reset() {
+      function Particle() {
+        this.x = Math.random() * w;
+        this.y = Math.random() * h;
+        this.size = Math.random() * 2.5 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.speedY = (Math.random() - 0.5) * 0.3;
+        this.opacity = Math.random() * 0.4 + 0.05;
+      }
+
+      Particle.prototype.update = function () {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < -10 || this.x > w + 10 || this.y < -10 || this.y > h + 10) {
           this.x = Math.random() * w;
           this.y = Math.random() * h;
-          this.size = Math.random() * 3 + 1;
-          this.speedX = (Math.random() - 0.5) * 0.4;
-          this.speedY = (Math.random() - 0.5) * 0.4;
-          this.opacity = Math.random() * 0.5 + 0.1;
         }
-        update() {
-          this.x += this.speedX;
-          this.y += this.speedY;
-          if (this.x < 0 || this.x > w || this.y < 0 || this.y > h) this.reset();
-        }
-        draw() {
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(108, 99, 255, ${this.opacity})`;
-          ctx.fill();
-        }
-      }
+      };
+
+      Particle.prototype.draw = function () {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(108, 99, 255,' + this.opacity + ')';
+        ctx.fill();
+      };
 
       function initParticles() {
         particles = [];
-        const count = Math.min(80, Math.floor((w * h) / 12000));
-        for (let i = 0; i < count; i++) particles.push(new Particle());
+        var count = Math.min(MAX_PARTICLES, Math.floor((w * h) / 18000));
+        for (var i = 0; i < count; i++) particles.push(new Particle());
       }
       initParticles();
 
       function connect() {
-        for (let i = 0; i < particles.length; i++) {
-          for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 140) {
+        if (CONNECT_DIST === 0) return;
+        var len = particles.length;
+        for (var i = 0; i < len; i++) {
+          var pi = particles[i];
+          for (var j = i + 1; j < len; j++) {
+            var pj = particles[j];
+            var dx = pi.x - pj.x;
+            var dy = pi.y - pj.y;
+            if (dx > CONNECT_DIST || dy > CONNECT_DIST || dx < -CONNECT_DIST || dy < -CONNECT_DIST) continue;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < CONNECT_DIST) {
               ctx.beginPath();
-              ctx.moveTo(particles[i].x, particles[i].y);
-              ctx.lineTo(particles[j].x, particles[j].y);
-              ctx.strokeStyle = `rgba(108, 99, 255, ${0.08 * (1 - dist / 140)})`;
-              ctx.lineWidth = 0.6;
+              ctx.moveTo(pi.x, pi.y);
+              ctx.lineTo(pj.x, pj.y);
+              ctx.strokeStyle = 'rgba(108, 99, 255,' + (0.06 * (1 - dist / CONNECT_DIST)) + ')';
+              ctx.lineWidth = 0.5;
               ctx.stroke();
             }
           }
@@ -2169,25 +2205,30 @@
 
       function animate() {
         ctx.clearRect(0, 0, w, h);
-        particles.forEach(p => { p.update(); p.draw(); });
-        connect();
+        for (var i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+        }
+        if (CONNECT_DIST > 0) connect();
         requestAnimationFrame(animate);
       }
       animate();
-
-      window.addEventListener('resize', () => {
-        resize();
-        initParticles();
-      });
     })();
 
-    // ===== NAVBAR =====
+    // ===== NAVBAR (scroll with RAF) =====
     const navbar = document.getElementById('navbar');
     const hamburger = document.getElementById('hamburger');
     const navLinks = document.getElementById('navLinks');
 
+    let ticking = false;
     window.addEventListener('scroll', () => {
-      navbar.classList.toggle('scrolled', window.scrollY > 50);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          navbar.classList.toggle('scrolled', window.scrollY > 50);
+          ticking = false;
+        });
+        ticking = true;
+      }
     });
 
     hamburger.addEventListener('click', () => {
